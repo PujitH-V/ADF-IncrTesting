@@ -1,0 +1,38 @@
+{
+	"name": "DataLake_Intermediate_Store_DS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "DATALAKE_LS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"folder_lv1": {
+				"type": "string"
+			},
+			"folder_lv2": {
+				"type": "string"
+			},
+			"filename": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().filename",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "{@dataset().folder_lv1/@dataset().folder_lv2}",
+					"type": "Expression"
+				},
+				"fileSystem": "salessrc/"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}

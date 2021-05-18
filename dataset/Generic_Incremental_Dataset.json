@@ -1,0 +1,30 @@
+{
+	"name": "Generic_Incremental_Dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SLSDB_LS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"src_schema": {
+				"type": "string"
+			},
+			"src_tablename": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().src_schema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().src_tablename",
+				"type": "Expression"
+			}
+		}
+	}
+}
