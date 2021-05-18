@@ -10,6 +10,14 @@
 		"SLSDB_LS_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'SLSDB_LS'"
+		},
+		"DATALAKE_LS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'DATALAKE_LS'"
+		},
+		"DATALAKE_LS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://salesstr.dfs.core.windows.net"
 		}
 	},
 	"variables": {
@@ -25,6 +33,23 @@
 				"type": "AzureSqlDatabase",
 				"typeProperties": {
 					"connectionString": "[parameters('SLSDB_LS_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DATALAKE_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('DATALAKE_LS_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('DATALAKE_LS_accountKey')]"
+					}
 				}
 			},
 			"dependsOn": []
@@ -95,6 +120,84 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Generic_Incremental_Dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SLSDB_LS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"src_schema": {
+						"type": "string"
+					},
+					"src_tablename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().src_schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().src_tablename",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/SLSDB_LS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DataLake_Intermediate_Store_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DATALAKE_LS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folder_lv1": {
+						"type": "string"
+					},
+					"folder_lv2": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "{@dataset().folder_lv1/@dataset().folder_lv2}",
+							"type": "Expression"
+						},
+						"fileSystem": "salessrc/"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DATALAKE_LS')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Incremental_and_Historical')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -126,12 +229,125 @@
 							},
 							"firstRowOnly": false
 						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup1').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "If Condition1",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(item().LoadType,'I')",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "Copy data1",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
+													},
+													"sink": {
+														"type": "ParquetSink",
+														"storeSettings": {
+															"type": "AzureBlobFSWriteSettings",
+															"copyBehavior": "PreserveHierarchy"
+														},
+														"formatSettings": {
+															"type": "ParquetWriteSettings"
+														}
+													},
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
+													}
+												},
+												"inputs": [
+													{
+														"referenceName": "Generic_Incremental_Dataset",
+														"type": "DatasetReference",
+														"parameters": {
+															"src_schema": {
+																"value": "@item().src_Schema",
+																"type": "Expression"
+															},
+															"src_tablename": {
+																"value": "@item().src_TableName",
+																"type": "Expression"
+															}
+														}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "DataLake_Intermediate_Store_DS",
+														"type": "DatasetReference",
+														"parameters": {
+															"folder_lv1": {
+																"value": "@item().src_Schema",
+																"type": "Expression"
+															},
+															"folder_lv2": {
+																"value": "@item().ADLS_FolderName",
+																"type": "Expression"
+															},
+															"filename": {
+																"value": "@concat(item().src_TableName,'.par')",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											}
+										]
+									}
+								}
+							]
+						}
 					}
 				],
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/Lookup_dataset')]"
+				"[concat(variables('factoryId'), '/datasets/Lookup_dataset')]",
+				"[concat(variables('factoryId'), '/datasets/Generic_Incremental_Dataset')]",
+				"[concat(variables('factoryId'), '/datasets/DataLake_Intermediate_Store_DS')]"
 			]
 		}
 	]

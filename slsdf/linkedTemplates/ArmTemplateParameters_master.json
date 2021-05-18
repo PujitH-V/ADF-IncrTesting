@@ -8,6 +8,12 @@
 		"SLSDB_LS_connectionString": {
 			"value": ""
 		},
+		"DATALAKE_LS_accountKey": {
+			"value": ""
+		},
+		"DATALAKE_LS_properties_typeProperties_url": {
+			"value": "https://salesstr.dfs.core.windows.net"
+		},
 		"containerUri": {
 			"value": ""
 		},
