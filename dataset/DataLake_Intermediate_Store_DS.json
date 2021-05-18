@@ -6,9 +6,6 @@
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"folder_lv1": {
-				"type": "string"
-			},
 			"folder_lv2": {
 				"type": "string"
 			},
@@ -26,7 +23,7 @@
 					"type": "Expression"
 				},
 				"folderPath": {
-					"value": "{@dataset().folder_lv1/@dataset().folder_lv2}",
+					"value": "@dataset().folder_lv2",
 					"type": "Expression"
 				},
 				"fileSystem": "salessrc/"

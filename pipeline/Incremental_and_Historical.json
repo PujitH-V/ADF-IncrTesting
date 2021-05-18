@@ -117,10 +117,6 @@
 												"referenceName": "DataLake_Intermediate_Store_DS",
 												"type": "DatasetReference",
 												"parameters": {
-													"folder_lv1": {
-														"value": "@item().src_Schema",
-														"type": "Expression"
-													},
 													"folder_lv2": {
 														"value": "@item().ADLS_FolderName",
 														"type": "Expression"
