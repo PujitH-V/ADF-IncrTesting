@@ -7,13 +7,13 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "slsdf"
 		},
-		"SLSDB_LS_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'SLSDB_LS'"
-		},
 		"DATALAKE_LS_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'DATALAKE_LS'"
+		},
+		"SLSDB_LS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'SLSDB_LS'"
 		},
 		"DATALAKE_LS_properties_typeProperties_url": {
 			"type": "string",
@@ -24,19 +24,6 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
-		{
-			"name": "[concat(parameters('factoryName'), '/SLSDB_LS')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"connectionString": "[parameters('SLSDB_LS_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DATALAKE_LS')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -53,6 +40,94 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SLSDB_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('SLSDB_LS_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DataLake_Intermediate_Store_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DATALAKE_LS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folder_lv2": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().folder_lv2",
+							"type": "Expression"
+						},
+						"fileSystem": "salessrc/"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DATALAKE_LS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Generic_Incremental_Dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SLSDB_LS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"src_schema": {
+						"type": "string"
+					},
+					"src_tablename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().src_schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().src_tablename",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/SLSDB_LS')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Lookup_dataset')]",
@@ -117,84 +192,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/SLSDB_LS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Generic_Incremental_Dataset')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "SLSDB_LS",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"src_schema": {
-						"type": "string"
-					},
-					"src_tablename": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@dataset().src_schema",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@dataset().src_tablename",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/SLSDB_LS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DataLake_Intermediate_Store_DS')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "DATALAKE_LS",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"folder_lv1": {
-						"type": "string"
-					},
-					"folder_lv2": {
-						"type": "string"
-					},
-					"filename": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "Parquet",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": {
-							"value": "@dataset().filename",
-							"type": "Expression"
-						},
-						"folderPath": {
-							"value": "{@dataset().folder_lv1/@dataset().folder_lv2}",
-							"type": "Expression"
-						},
-						"fileSystem": "salessrc/"
-					},
-					"compressionCodec": "snappy"
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/DATALAKE_LS')]"
 			]
 		},
 		{
@@ -319,10 +316,6 @@
 														"referenceName": "DataLake_Intermediate_Store_DS",
 														"type": "DatasetReference",
 														"parameters": {
-															"folder_lv1": {
-																"value": "@item().src_Schema",
-																"type": "Expression"
-															},
 															"folder_lv2": {
 																"value": "@item().ADLS_FolderName",
 																"type": "Expression"

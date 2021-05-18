@@ -7,13 +7,13 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "slsdf"
 		},
-		"SLSDB_LS_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'SLSDB_LS'"
-		},
 		"DATALAKE_LS_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'DATALAKE_LS'"
+		},
+		"SLSDB_LS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'SLSDB_LS'"
 		},
 		"DATALAKE_LS_properties_typeProperties_url": {
 			"type": "string",
@@ -46,11 +46,11 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
-					"SLSDB_LS_connectionString": {
-						"value": "[parameters('SLSDB_LS_connectionString')]"
-					},
 					"DATALAKE_LS_accountKey": {
 						"value": "[parameters('DATALAKE_LS_accountKey')]"
+					},
+					"SLSDB_LS_connectionString": {
+						"value": "[parameters('SLSDB_LS_connectionString')]"
 					},
 					"DATALAKE_LS_properties_typeProperties_url": {
 						"value": "[parameters('DATALAKE_LS_properties_typeProperties_url')]"
