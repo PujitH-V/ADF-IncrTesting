@@ -80,11 +80,10 @@
 							"value": "@dataset().filename",
 							"type": "Expression"
 						},
-						"folderPath": {
+						"fileSystem": {
 							"value": "@dataset().folder_lv2",
 							"type": "Expression"
-						},
-						"fileSystem": "salessrc/"
+						}
 					},
 					"compressionCodec": "snappy"
 				},
@@ -529,7 +528,7 @@
 														"type": "DatasetReference",
 														"parameters": {
 															"folder_lv2": {
-																"value": "@item().ADLS_FolderName",
+																"value": "@concat('salessrc/',item().ADLS_FolderName)",
 																"type": "Expression"
 															},
 															"filename": {
