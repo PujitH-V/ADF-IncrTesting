@@ -194,7 +194,7 @@
 												"type": "DatasetReference",
 												"parameters": {
 													"folder_lv2": {
-														"value": "@item().ADLS_FolderName",
+														"value": "@concat('salessrc/',item().ADLS_FolderName)",
 														"type": "Expression"
 													},
 													"filename": {
