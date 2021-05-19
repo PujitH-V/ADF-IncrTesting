@@ -1,0 +1,41 @@
+{
+	"name": "Historical_load_stage1_ds",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "DATALAKE_LS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"foldername": {
+				"type": "string"
+			},
+			"entityname": {
+				"type": "string"
+			},
+			"filename": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().filename",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().entityname",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@dataset().foldername",
+					"type": "Expression"
+				}
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}
