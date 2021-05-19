@@ -174,6 +174,47 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/metadata_testing')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Metadata1",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "metadata_parquet_dataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"exists"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							}
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/metadata_parquet_dataset')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DataLake_Intermediate_Store_DS')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -311,6 +352,61 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/SLSDB_LS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/metadata_parquet_dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DATALAKE_LS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "customers.par",
+						"folderPath": "Customers_ADLS_Stage1",
+						"fileSystem": "salessrc"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "c_id",
+						"type": "INT32"
+					},
+					{
+						"name": "c_unique_id",
+						"type": "UTF8"
+					},
+					{
+						"name": "c_name",
+						"type": "UTF8"
+					},
+					{
+						"name": "Customer_Account_Created_Timestamp",
+						"type": "INT96"
+					},
+					{
+						"name": "customer_pincode",
+						"type": "UTF8"
+					},
+					{
+						"name": "customer_city",
+						"type": "UTF8"
+					},
+					{
+						"name": "customer_mobile_number",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DATALAKE_LS')]"
 			]
 		},
 		{
