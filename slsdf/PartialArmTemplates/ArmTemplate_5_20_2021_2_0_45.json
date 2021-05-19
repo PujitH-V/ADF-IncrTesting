@@ -6,18 +6,6 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "slsdf"
-		},
-		"DATALAKE_LS_accountKey": {
-			"type": "secureString",
-			"metadata": "Secure string for 'accountKey' of 'DATALAKE_LS'"
-		},
-		"SLSDB_LS_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'SLSDB_LS'"
-		},
-		"DATALAKE_LS_properties_typeProperties_url": {
-			"type": "string",
-			"defaultValue": "https://salesstr.dfs.core.windows.net"
 		}
 	},
 	"variables": {
@@ -51,8 +39,7 @@
 							},
 							"dataset": {
 								"referenceName": "Lookup_dataset",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							},
 							"firstRowOnly": false
 						}
@@ -244,92 +231,8 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/Lookup_dataset')]",
 				"[concat(variables('factoryId'), '/datasets/Generic_Historical_dataset')]",
-				"[concat(variables('factoryId'), '/datasets/Historical_load_stage1_ds')]",
-				"[concat(variables('factoryId'), '/datasets/Generic_Incremental_Dataset')]",
-				"[concat(variables('factoryId'), '/datasets/DataLake_Intermediate_Store_DS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/metadata_testing')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Get Metadata1",
-						"type": "GetMetadata",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "metadata_parquet_dataset",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"fieldList": [
-								"exists"
-							],
-							"storeSettings": {
-								"type": "AzureBlobFSReadSettings",
-								"recursive": true,
-								"enablePartitionDiscovery": false
-							}
-						}
-					}
-				],
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/metadata_parquet_dataset')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DataLake_Intermediate_Store_DS')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "DATALAKE_LS",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"folder_lv2": {
-						"type": "string"
-					},
-					"filename": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "Parquet",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": {
-							"value": "@dataset().filename",
-							"type": "Expression"
-						},
-						"folderPath": {
-							"value": "@dataset().folder_lv2",
-							"type": "Expression"
-						},
-						"fileSystem": "salessrc/"
-					},
-					"compressionCodec": "snappy"
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/DATALAKE_LS')]"
+				"[concat(variables('factoryId'), '/datasets/Historical_load_stage1_ds')]"
 			]
 		},
 		{
@@ -363,44 +266,7 @@
 					}
 				}
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/SLSDB_LS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Generic_Incremental_Dataset')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "SLSDB_LS",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"src_schema": {
-						"type": "string"
-					},
-					"src_tablename": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@dataset().src_schema",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@dataset().src_tablename",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/SLSDB_LS')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Historical_load_stage1_ds')]",
@@ -443,158 +309,6 @@
 					"compressionCodec": "snappy"
 				},
 				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/DATALAKE_LS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Lookup_dataset')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "SLSDB_LS",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "SubjectId",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "SubjectName",
-						"type": "nvarchar"
-					},
-					{
-						"name": "src_Schema",
-						"type": "nvarchar"
-					},
-					{
-						"name": "src_TableName",
-						"type": "nvarchar"
-					},
-					{
-						"name": "ADLS_FolderName",
-						"type": "nvarchar"
-					},
-					{
-						"name": "Synapse_DW_Schema",
-						"type": "nvarchar"
-					},
-					{
-						"name": "Synapse_DW_TableName",
-						"type": "nvarchar"
-					},
-					{
-						"name": "LoadType",
-						"type": "nvarchar"
-					},
-					{
-						"name": "threshhold_datetime_value",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
-					},
-					{
-						"name": "ADW_Copy_Lookup",
-						"type": "nvarchar"
-					}
-				],
-				"typeProperties": {
-					"schema": "metadata",
-					"table": "lookup_master"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/SLSDB_LS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/metadata_parquet_dataset')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "DATALAKE_LS",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Parquet",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "customers.par",
-						"folderPath": "Customers_ADLS_Stage1",
-						"fileSystem": "salessrc"
-					},
-					"compressionCodec": "snappy"
-				},
-				"schema": [
-					{
-						"name": "c_id",
-						"type": "INT32"
-					},
-					{
-						"name": "c_unique_id",
-						"type": "UTF8"
-					},
-					{
-						"name": "c_name",
-						"type": "UTF8"
-					},
-					{
-						"name": "Customer_Account_Created_Timestamp",
-						"type": "INT96"
-					},
-					{
-						"name": "customer_pincode",
-						"type": "UTF8"
-					},
-					{
-						"name": "customer_city",
-						"type": "UTF8"
-					},
-					{
-						"name": "customer_mobile_number",
-						"type": "UTF8"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/DATALAKE_LS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DATALAKE_LS')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('DATALAKE_LS_properties_typeProperties_url')]",
-					"accountKey": {
-						"type": "SecureString",
-						"value": "[parameters('DATALAKE_LS_accountKey')]"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SLSDB_LS')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"connectionString": "[parameters('SLSDB_LS_connectionString')]"
-				}
 			},
 			"dependsOn": []
 		}
