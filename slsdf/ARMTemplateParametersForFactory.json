@@ -11,7 +11,13 @@
 		"SLSDB_LS_connectionString": {
 			"value": ""
 		},
+		"Schema_linked_service_accountKey": {
+			"value": ""
+		},
 		"DATALAKE_LS_properties_typeProperties_url": {
+			"value": "https://salesstr.dfs.core.windows.net"
+		},
+		"Schema_linked_service_properties_typeProperties_url": {
 			"value": "https://salesstr.dfs.core.windows.net"
 		}
 	}

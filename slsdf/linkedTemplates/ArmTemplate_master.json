@@ -15,7 +15,15 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'SLSDB_LS'"
 		},
+		"Schema_linked_service_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'Schema_linked_service'"
+		},
 		"DATALAKE_LS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://salesstr.dfs.core.windows.net"
+		},
+		"Schema_linked_service_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://salesstr.dfs.core.windows.net"
 		},
@@ -52,8 +60,14 @@
 					"SLSDB_LS_connectionString": {
 						"value": "[parameters('SLSDB_LS_connectionString')]"
 					},
+					"Schema_linked_service_accountKey": {
+						"value": "[parameters('Schema_linked_service_accountKey')]"
+					},
 					"DATALAKE_LS_properties_typeProperties_url": {
 						"value": "[parameters('DATALAKE_LS_properties_typeProperties_url')]"
+					},
+					"Schema_linked_service_properties_typeProperties_url": {
+						"value": "[parameters('Schema_linked_service_properties_typeProperties_url')]"
 					}
 				}
 			},
