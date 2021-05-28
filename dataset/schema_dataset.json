@@ -1,0 +1,48 @@
+{
+	"name": "schema_dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Schema_linked_service",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "schema.csv",
+				"fileSystem": "salessrc"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": false,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "seller_id",
+				"type": "String"
+			},
+			{
+				"name": "seller_organization_name",
+				"type": "String"
+			},
+			{
+				"name": "seller_state",
+				"type": "String"
+			},
+			{
+				"name": "seller_city",
+				"type": "String"
+			},
+			{
+				"name": "seller_address",
+				"type": "String"
+			},
+			{
+				"name": "seller_created_timestamp",
+				"type": "String"
+			}
+		]
+	}
+}

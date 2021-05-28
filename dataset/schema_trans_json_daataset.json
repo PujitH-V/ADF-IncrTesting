@@ -1,0 +1,20 @@
+{
+	"name": "schema_trans_json_daataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Schema_linked_service",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "schema.json",
+				"folderPath": "json_schema",
+				"fileSystem": "salessink"
+			}
+		},
+		"schema": {}
+	}
+}
