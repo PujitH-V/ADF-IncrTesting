@@ -105,10 +105,11 @@
 							"value": "@dataset().filename",
 							"type": "Expression"
 						},
-						"fileSystem": {
+						"folderPath": {
 							"value": "@dataset().folder_lv2",
 							"type": "Expression"
-						}
+						},
+						"fileSystem": "salessrc"
 					},
 					"compressionCodec": "snappy"
 				},
@@ -544,7 +545,7 @@
 											"type": "DatasetReference",
 											"parameters": {
 												"folder_lv2": {
-													"value": "@concat('salessrc/Incremental/',item().ADLS_FolderName)",
+													"value": "@item().src_Schema",
 													"type": "Expression"
 												},
 												"filename": {
