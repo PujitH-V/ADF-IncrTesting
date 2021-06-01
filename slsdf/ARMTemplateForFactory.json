@@ -85,169 +85,75 @@
 							"isSequential": true,
 							"activities": [
 								{
-									"name": "If Condition1",
-									"type": "IfCondition",
+									"name": "Copy data1",
+									"type": "Copy",
 									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
 									"userProperties": [],
 									"typeProperties": {
-										"expression": {
-											"value": "@equals(item().LoadType,'I')",
-											"type": "Expression"
+										"source": {
+											"type": "AzureSqlSource",
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
 										},
-										"ifFalseActivities": [
-											{
-												"name": "historical_dataload",
-												"type": "Copy",
-												"dependsOn": [],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "AzureSqlSource",
-														"queryTimeout": "02:00:00",
-														"partitionOption": "None"
-													},
-													"sink": {
-														"type": "ParquetSink",
-														"storeSettings": {
-															"type": "AzureBlobFSWriteSettings"
-														},
-														"formatSettings": {
-															"type": "ParquetWriteSettings"
-														}
-													},
-													"enableStaging": false,
-													"translator": {
-														"type": "TabularTranslator",
-														"typeConversion": true,
-														"typeConversionSettings": {
-															"allowDataTruncation": true,
-															"treatBooleanAsNumber": false
-														}
-													}
-												},
-												"inputs": [
-													{
-														"referenceName": "Generic_Historical_dataset",
-														"type": "DatasetReference",
-														"parameters": {
-															"Table_Schema": {
-																"value": "@item().src_Schema",
-																"type": "Expression"
-															},
-															"Table_Name": {
-																"value": "@item().src_TableName",
-																"type": "Expression"
-															}
-														}
-													}
-												],
-												"outputs": [
-													{
-														"referenceName": "Historical_load_stage1_ds",
-														"type": "DatasetReference",
-														"parameters": {
-															"foldername": {
-																"value": "@if(equals(item().LoadType,'H'),'salessrc/Historical','salessrc/Incremental')",
-																"type": "Expression"
-															},
-															"entityname": {
-																"value": "@item().ADLS_FolderName",
-																"type": "Expression"
-															},
-															"filename": {
-																"value": "@concat(item().SubjectName,'.par')",
-																"type": "Expression"
-															}
-														}
-													}
-												]
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings",
+												"copyBehavior": "PreserveHierarchy"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
 											}
-										],
-										"ifTrueActivities": [
-											{
-												"name": "Copy data1",
-												"type": "Copy",
-												"dependsOn": [],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "AzureSqlSource",
-														"sqlReaderQuery": {
-															"value": "@concat('select * from ',item().src_Schema,'.',item().src_TableName,' where src_sys_d >= cast(',item().Load_Start_Timestamp,' as datetime)')",
-															"type": "Expression"
-														},
-														"queryTimeout": "02:00:00",
-														"partitionOption": "None"
-													},
-													"sink": {
-														"type": "ParquetSink",
-														"storeSettings": {
-															"type": "AzureBlobFSWriteSettings",
-															"copyBehavior": "PreserveHierarchy"
-														},
-														"formatSettings": {
-															"type": "ParquetWriteSettings"
-														}
-													},
-													"enableStaging": false,
-													"translator": {
-														"type": "TabularTranslator",
-														"typeConversion": true,
-														"typeConversionSettings": {
-															"allowDataTruncation": true,
-															"treatBooleanAsNumber": false
-														}
-													}
-												},
-												"inputs": [
-													{
-														"referenceName": "Generic_Incremental_Dataset",
-														"type": "DatasetReference",
-														"parameters": {
-															"src_schema": {
-																"value": "@item().src_Schema",
-																"type": "Expression"
-															},
-															"src_tablename": {
-																"value": "@item().src_TableName",
-																"type": "Expression"
-															}
-														}
-													}
-												],
-												"outputs": [
-													{
-														"referenceName": "DataLake_Intermediate_Store_DS",
-														"type": "DatasetReference",
-														"parameters": {
-															"folder_lv2": {
-																"value": "@concat('salessrc/Incremental/',item().ADLS_FolderName)",
-																"type": "Expression"
-															},
-															"filename": {
-																"value": "@concat(item().src_TableName,'.par')",
-																"type": "Expression"
-															}
-														}
-													}
-												]
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
 											}
-										]
-									}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "Generic_Incremental_Dataset",
+											"type": "DatasetReference",
+											"parameters": {
+												"src_schema": {
+													"value": "@item().src_Schema",
+													"type": "Expression"
+												},
+												"src_tablename": {
+													"value": "@item().src_TableName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DataLake_Intermediate_Store_DS",
+											"type": "DatasetReference",
+											"parameters": {
+												"folder_lv2": {
+													"value": "@concat('salessrc/Incremental/',item().ADLS_FolderName)",
+													"type": "Expression"
+												},
+												"filename": {
+													"value": "@concat(item().src_TableName,'.par')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
 								}
 							]
 						}
@@ -257,8 +163,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/Lookup_dataset')]",
-				"[concat(variables('factoryId'), '/datasets/Generic_Historical_dataset')]",
-				"[concat(variables('factoryId'), '/datasets/Historical_load_stage1_ds')]",
 				"[concat(variables('factoryId'), '/datasets/Generic_Incremental_Dataset')]",
 				"[concat(variables('factoryId'), '/datasets/DataLake_Intermediate_Store_DS')]"
 			]
