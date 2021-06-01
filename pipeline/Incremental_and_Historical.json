@@ -107,7 +107,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"folder_lv2": {
-											"value": "@concat('salessrc/Incremental/',item().ADLS_FolderName)",
+											"value": "@item().src_Schema",
 											"type": "Expression"
 										},
 										"filename": {

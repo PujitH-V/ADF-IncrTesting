@@ -22,10 +22,11 @@
 					"value": "@dataset().filename",
 					"type": "Expression"
 				},
-				"fileSystem": {
+				"folderPath": {
 					"value": "@dataset().folder_lv2",
 					"type": "Expression"
-				}
+				},
+				"fileSystem": "salessrc"
 			},
 			"compressionCodec": "snappy"
 		},
