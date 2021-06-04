@@ -16,15 +16,19 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "metadata_parquet_dataset",
+						"referenceName": "schema_metadata",
 						"type": "DatasetReference"
 					},
 					"fieldList": [
-						"exists"
+						"lastModified"
 					],
 					"storeSettings": {
 						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
 						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
 					}
 				}
 			}
