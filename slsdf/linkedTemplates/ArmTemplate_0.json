@@ -697,10 +697,7 @@
 						"typeProperties": {
 							"notebookPath": "/Users/shivashameendra@gmail.com/practice",
 							"baseParameters": {
-								"test_parameter1": {
-									"value": "@activity('Lookup1').output.firstRow.Synapse_DW_TableName",
-									"type": "Expression"
-								}
+								"test_parameter1": "Synapse_DW_TableName"
 							}
 						},
 						"linkedServiceName": {
