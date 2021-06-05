@@ -19,6 +19,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'Schema_linked_service'"
 		},
+		"dbricks_ls_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'dbricks_ls'"
+		},
 		"DATALAKE_LS_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://salesstr.dfs.core.windows.net"
@@ -75,6 +79,24 @@
 						"type": "SecureString",
 						"value": "[parameters('Schema_linked_service_accountKey')]"
 					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dbricks_ls')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-905677211956452.12.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('dbricks_ls_accessToken')]"
+					},
+					"existingClusterId": "0518-134825-quit260"
 				}
 			},
 			"dependsOn": []
@@ -619,6 +641,79 @@
 				"[concat(variables('factoryId'), '/datasets/Lookup_dataset')]",
 				"[concat(variables('factoryId'), '/datasets/Generic_Incremental_Dataset')]",
 				"[concat(variables('factoryId'), '/datasets/DataLake_Intermediate_Store_DS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/databricks_notebook_pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "Lookup_dataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "practice_notebook",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Users/shivashameendra@gmail.com/practice",
+							"baseParameters": {
+								"test_parameter1": {
+									"value": "@activity('Lookup1').output.firstRow.Synapse_DW_TableName",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "dbricks_ls",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Lookup_dataset')]",
+				"[concat(variables('factoryId'), '/linkedServices/dbricks_ls')]"
 			]
 		},
 		{

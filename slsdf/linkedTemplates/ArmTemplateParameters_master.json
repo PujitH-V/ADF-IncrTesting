@@ -14,6 +14,9 @@
 		"Schema_linked_service_accountKey": {
 			"value": ""
 		},
+		"dbricks_ls_accessToken": {
+			"value": ""
+		},
 		"DATALAKE_LS_properties_typeProperties_url": {
 			"value": "https://salesstr.dfs.core.windows.net"
 		},
