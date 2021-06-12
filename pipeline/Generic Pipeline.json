@@ -105,7 +105,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"FolderName": {
-											"value": "@concat(item().ADLS_FolderName,'/',utcnow())",
+											"value": "@item().ADLS_FolderName",
 											"type": "Expression"
 										},
 										"FileName": {
